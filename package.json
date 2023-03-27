@@ -11,6 +11,10 @@
   },
   "private": true,
   "dependencies": {
+    "@adaptabletools/adaptable-angular-aggrid": "^7.3.4",
+    "@ag-grid-community/all-modules": "^24.1.0",
+    "@ag-grid-community/angular": "^24.1.0",
+    "@ag-grid-enterprise/all-modules": "^24.1.0",
     "@angular/animations": "~9.1.13",
     "@angular/common": "~9.1.13",
     "@angular/compiler": "~9.1.13",
@@ -19,6 +23,9 @@
     "@angular/platform-browser": "~9.1.13",
     "@angular/platform-browser-dynamic": "~9.1.13",
     "@angular/router": "~9.1.13",
+    "prettier": "^2.8.7",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"

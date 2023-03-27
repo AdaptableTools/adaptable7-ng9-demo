@@ -1,32 +1,136 @@
+// app.component.ts
 import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import {
+  GridApi,
+  GridOptions,
+  Module,
+  ColDef,
+} from '@ag-grid-community/all-modules';
+import { AllEnterpriseModules } from '@ag-grid-enterprise/all-modules';
+import {
+  AdaptableOptions,
+  AdaptableToolPanelAgGridComponent,
+  PredicateDefHandlerParams,
+} from '@adaptabletools/adaptable-angular-aggrid';
+
+import { orders } from './ordersData';
+
+const MAX_DATA_COUNT = 100;
+orders.length = Math.min(MAX_DATA_COUNT, orders.length);
 
 @Component({
-  selector: 'app-root',
+  selector: 'adaptable-root',
   template: `
-    <!--The content below is only a placeholder and can be replaced.-->
-    <div style="text-align:center" class="content">
-      <h1>
-        Welcome to {{title}}!
-      </h1>
-      <span style="display: block">{{ title }} app is running!</span>
-      <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
-    </div>
-    <h2>Here are some links to help you start: </h2>
-    <ul>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/cli">CLI Documentation</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-      </li>
-    </ul>
-    
+    <adaptable-angular-aggrid
+      [adaptableOptions]="adaptableOptions"
+      (adaptableReady)="adaptableReady($event)"
+      [gridOptions]="gridOptions"
+      [modules]="agGridModules"
+    >
+    </adaptable-angular-aggrid>
+    <ag-grid-angular
+      [gridOptions]="gridOptions"
+      [rowData]="rowData"
+      [modules]="agGridModules"
+      style="flex: 1"
+      class="ag-theme-balham"
+    >
+    </ag-grid-angular>
   `,
-  styles: []
+  styles: [
+    `
+      :host {
+        height: 100vh;
+        display: flex;
+        flex-flow: column;
+      }
+    `,
+  ],
 })
 export class AppComponent {
-  title = 'adaptable7-ng9-demo';
+  public gridApi: GridApi;
+  public agGridModules: Module[] = AllEnterpriseModules;
+  public gridColumnApi;
+  public columnDefs;
+  public rowData: any[];
+  public gridOptions: GridOptions;
+
+  public adaptableOptions: AdaptableOptions = {
+    primaryKey: 'OrderId',
+    userName: 'demo user',
+    adaptableId: 'Adaptable7 Angular9 Demo',
+    userInterfaceOptions: {
+      showAdaptableToolPanel: true,
+    },
+    customPredicateDefs: [
+      {
+        id: 'new_starter',
+        label: 'OrderCost > 500 & PackageCost < 10',
+        columnScope: { ColumnIds: ['CompanyName'] },
+        functionScope: ['filter'],
+        handler(params: PredicateDefHandlerParams) {
+          const rowData = params.node.data;
+          return rowData.OrderCost > 500 && rowData.PackageCost < 10;
+        },
+      },
+    ],
+    predefinedConfig: {
+      Query: {
+        Revision: 5,
+        SharedQueries: [
+          {
+            Name: 'Employee starting with M',
+            Expression: 'STARTS_WITH([Employee], "M")',
+          },
+          {
+            Name: 'Orders greater than 500',
+            Expression: '[OrderCost] > 500',
+          },
+        ],
+      },
+    },
+  };
+
+  constructor(private http: HttpClient) {
+    this.http = http;
+
+    this.columnDefs = [
+      { field: 'OrderId', type: 'abColDefNumber', resizable: true },
+      { field: 'CompanyName', type: 'abColDefString' },
+      { field: 'ContactName', type: 'abColDefString' },
+      { field: 'Employee', type: 'abColDefString' },
+      { field: 'OrderCost', type: 'abColDefNumber' },
+      { field: 'ItemCost', type: 'abColDefNumber' },
+      { field: 'PackageCost', type: 'abColDefNumber' },
+    ].map((c: ColDef) => {
+      c.filter = true;
+      c.floatingFilter = true;
+      return c;
+    });
+
+    this.gridOptions = {
+      enableRangeSelection: true,
+      sideBar: true,
+      components: {
+        AdaptableToolPanel: AdaptableToolPanelAgGridComponent,
+      },
+      columnDefs: this.columnDefs,
+      rowData: this.rowData,
+      onGridReady: this.onGridReady,
+    };
+  }
+
+  adaptableReady = ({ adaptableApi, vendorGrid }) => {
+    console.log({ adaptableApi, vendorGrid });
+  };
+
+  onGridReady = (params) => {
+    this.gridApi = params.api;
+    this.gridColumnApi = params.columnApi;
+
+    setTimeout(() => {
+      this.gridApi.setRowData(orders);
+    }, 500);
+  };
 }

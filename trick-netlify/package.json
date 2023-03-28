@@ -1,0 +1,10 @@
+{
+  "name": "trick-netlify",
+  "version": "1.0.0",
+  "description": "Netlify wants to install something, so we give him this",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

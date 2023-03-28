@@ -76,6 +76,15 @@ export class AppComponent {
       },
     ],
     predefinedConfig: {
+      Dashboard: {
+        Revision: 1,
+        Tabs: [
+          {
+            Name: 'Main Tab',
+            Toolbars: ['Query', 'Layout'],
+          },
+        ],
+      },
       Query: {
         Revision: 5,
         SharedQueries: [
